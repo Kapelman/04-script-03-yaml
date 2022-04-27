@@ -75,22 +75,69 @@ vagrant@vagrant:~/py_script$ python main4.py
 
 ### Ваш скрипт:
 ```python
-???
+import os
+import socket
+import datetime
+import time
+import json
+import yaml
+
+
+dns_list = ['drive.google.com','mail.google.com','google.com']
+
+if os.path.exists('web-services.yaml'):
+    with open('web-services.yaml') as f:
+
+        dns_ip_prev = yaml.safe_load(f)
+        dns_ip_cur = dict()
+        for dns_name in dns_list:
+            dns_ip_cur[dns_name] = ''
+else:
+    dns_ip_prev = dict()
+    dns_ip_cur = dict()
+    for dns_name in dns_list:
+        dns_ip_prev[dns_name] = ''
+        dns_ip_cur[dns_name] = ''
+
+for dns_name in dns_list:
+    ip1 = socket.gethostbyname(dns_name)
+    prev_ip = dns_ip_prev[dns_name]
+    if  prev_ip != ip1 and dns_ip_prev[dns_name] != '':
+        dns_ip_cur[dns_name] = ip1
+        print('[ERROR] ' + dns_name +' '+'IP mismatch: ' + dns_ip_prev[dns_name] +' ' + dns_ip_cur[dns_name])
+    else:
+        dns_ip_prev[dns_name] = ip1
+        dns_ip_cur [dns_name] = ip1
+        print(dns_name + ' - ' + dns_ip_prev[dns_name])
+
+with open('web-services.yaml', 'w') as opened_file:
+    yaml.dump(dns_ip_cur, opened_file, explicit_start=True,explicit_end=True, canonical=False,default_flow_style=False)
+
+with open('web-services.json', 'w') as opened_file_json:
+    json.dump(dns_ip_cur, opened_file_json)
+
 ```
 
 ### Вывод скрипта при запуске при тестировании:
 ```
-???
+vagrant@vagrant:~/py_script$ python main5.py
+drive.google.com - 173.194.73.194
+[ERROR] mail.google.com IP mismatch: 74.125.131.18 74.125.131.17
+[ERROR] google.com IP mismatch: 173.194.73.139 173.194.73.102
 ```
 
 ### json-файл(ы), который(е) записал ваш скрипт:
 ```json
-???
+{"google.com": "173.194.73.102", "drive.google.com": "173.194.73.194", "mail.google.com": "74.125.131.17"}
 ```
 
 ### yml-файл(ы), который(е) записал ваш скрипт:
 ```yaml
-???
+---
+drive.google.com: 173.194.73.194
+google.com: 173.194.73.102
+mail.google.com: 74.125.131.17
+...
 ```
 
 ## Дополнительное задание (со звездочкой*) - необязательно к выполнению
